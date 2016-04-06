@@ -29,7 +29,7 @@ public:
         data = aData.dup;
     }
     @property bool is_valid() const {
-    	return (aIndex >= 0) && (!(data is null)) && (data.length > 0);
+    	return (index >= 0) && (!(data is null)) && (data.length > 0);
     }// is_valid
     //
 public:
