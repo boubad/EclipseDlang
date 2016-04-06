@@ -1,0 +1,6 @@
+{
+	"name" : "testdone",
+	"description" : "Hello World - A minimal DUB bundle.",
+	"dependencies" : {
+	}
+}
