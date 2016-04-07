@@ -1,12 +1,20 @@
 module info.data.distance;
 ///////////////////////
 import std.math;
-/////////////////////
+////////////////////
 class DistanceFunc(T=int,Z=long) {
+	protected:
+	bool _valid;
+	public:
 	this(){
+		_valid = true;
+	}
+	@property bool is_valid() const {
+		return _valid;
 	}
 	Z opCall(in T[] data1, in T[] data2, in size_t irow1 = 0, in size_t irow2 = 0) const
 	in {
+		assert(this.is_valid);
 		assert(!(data1 is null));
 		assert(!(data2 is null));
 		assert(data2.length == data2.length);
@@ -78,26 +86,39 @@ class KhiDeuxDistanceFunc(T=int,Z=double) : DistanceFunc!(T,Z){
 			assert(data.length >= cast(size_t)(nRows * nCols));
 		}
 		body {
+			this._valid = true;
 			_rowsum = [];
 			_colsum = [];
 			_rowsum.length = nRows;
 			_colsum.length = nCols;
+			real total = 0;
 			for (size_t icol = 0; icol < nCols; ++icol){
+				_colsum[icol] = 0;
 				for (size_t irow = 0; irow < nRows; ++irow){
 					_colsum[icol] += data[irow * nCols + icol];
 				}// irow
-				assert(_colsum[icol] > 0);
+				if (_colsum[icol] <= 0){
+					this._valid = false;
+				}
+				total += _colsum[icol];
 			}// icol
+			for (size_t icol = 0; icol < nCols; ++icol){
+				_colsum[icol] /= total;
+			}
 			for (size_t irow = 0; irow < nRows; ++irow){
+				_rowsum[irow] = 0;
 				for (size_t icol = 0; icol < nCols; ++icol){
 					_rowsum[irow] += data[irow * nCols + icol];
 				}// irow
-				assert(_rowsum[irow] > 0);
+				if (_rowsum[irow] <= 0){
+					this._valid = false;
+				}
 			}// icol
 		}// body
 		protected:
  			 override real compute_one_step(in T v1, in T v2, in size_t icol, in size_t irow1, in size_t irow2) const
     			{
+    				assert(this.is_valid);
     				assert(icol < _colsum.length);
     				assert(irow1 < _rowsum.length);
     				assert(irow2 < _rowsum.length);
@@ -114,6 +135,61 @@ class KhiDeuxDistanceFunc(T=int,Z=double) : DistanceFunc!(T,Z){
 					return s;
 		}// perform_compute
 }// KhiDeuxDistanceFunc(T=int,Z=long)
+/////////////////////////////////////
+class DivergenceDistanceFunc(T=int,Z=double) : DistanceFunc!(T,Z){
+	public:
+		this()
+		{
+			super();
+		}// body
+		protected:
+ 			 override real compute_one_step(in T v1, in T v2, in size_t icol, in size_t irow1, in size_t irow2) const
+    			{
+    				real res = 0;
+    				real den = v1 + v2;
+    				if (den != 0){
+    					res = abs((v1 - v2)/den);
+    				}
+    				return res;
+    			}// compute_one_step
+			override real perform_compute(in T[] data1, in T[] data2, in size_t irow1, in size_t irow2) const
+				{
+					real s = 0;
+					immutable size_t n = data1.length;
+					for (size_t i = 0; i < n; ++i){
+						s  += compute_one_step(data1[i],data2[i],i, irow1, irow2);
+					}// i
+					return s;
+		}// perform_compute
+}// DivergenceDistanceFunc(T=int,Z=long)
+///////////////////////////////////////////
+class MaxDistanceFunc(T=int,Z=double) : DistanceFunc!(T,Z){
+	public:
+		this()
+		{
+			super();
+		}// body
+		protected:
+ 			 override real compute_one_step(in T v1, in T v2, in size_t icol, in size_t irow1, in size_t irow2) const
+    			{
+    				return abs(v1 - v2);
+    			}// compute_one_step
+			override real perform_compute(in T[] data1, in T[] data2, in size_t irow1, in size_t irow2) const
+				{
+					real s = 0;
+					immutable size_t n = data1.length;
+					for (size_t i = 0; i < n; ++i){
+						real v = compute_one_step(data1[i],data2[i],i, irow1, irow2);
+						if (i == 0){
+							s = v;
+						} else if (v > s){
+							s = v;
+						}
+						return s;
+					}// i
+					return s;
+		}// perform_compute
+}// MaxDistanceFunc(T=int,Z=long)
 /////////////////////////////////////////////
 class WeightedDistanceFunc(T=int,Z=long) : DistanceFunc!(T,Z)
 {
@@ -130,13 +206,16 @@ public:
     }
     body
     {
+    	this._valid = true;
         distance_function = fn;
         weights = [];
         const size_t n = pw.length;
         weights.length = n;
         for (size_t i = 0; i < n; ++i){
         	real v = cast(real)pw[i];
-        	assert(v >= 0);
+        	if (v < 0){
+        		this._valid = false;
+        	}
         	weights[i] = v;
         }// i
     }
@@ -159,25 +238,48 @@ protected:
 ////////////////////////////////
 unittest
 {
+	import std.stdio;
+	import std.format;
+	import info.data.testdata;
+	//
+	const size_t nRows = TestData.socmortal_rows;
+	const size_t nCols = TestData.socmortal_cols;
+	const int[] gdata = TestData.socmortal_data;
+	const string[] names = TestData.socmortal_inds;
+	/////////////////////////////
+	DistanceFunc!(int,long)[] dists = [];
+	dists ~= new DistanceFunc!(int,long);
+	dists ~= new ManhattanDistanceFunc!(int,long);
+	dists ~= new EuclideDistanceFunc!(int,long);
+	dists ~= new MaxDistanceFunc!(int,long);
+	DistanceFunc!(int,float)[] distsf = [];
+	distsf ~= new DivergenceDistanceFunc!(int,float);
+	distsf ~= new KhiDeuxDistanceFunc!(int,float)(nRows, nCols,gdata);
+	/////////////////////////////
+	foreach (f ; dists){
+		assert(f.is_valid);
+	}// f
+	foreach (f ; distsf){
+		assert(f.is_valid);
+	}// f
     /////////////////////////////
-    immutable real epsilon = 0.00001;
-    immutable int[] data1 = [0,1,2,3,4];
-    immutable int[] data2 = [5,6,7,8,9];
-    immutable float[] weights = [0.1, 0.2, 0.3, 0.4,0.5];
-    /////////////////////////////////
-    immutable long dx0 = 5;
-    auto fnManHattan = new ManhattanDistanceFunc!(int,long);
-    long d1 = fnManHattan(data1,data2);
-    assert(d1 == dx0);
-    ///////////////////////////////////
-    immutable long dr1 = 7;
-    auto fnW1 = new WeightedDistanceFunc!(int,long)(weights,fnManHattan);
-    long d2 = fnW1(data1,data2);
-    assert(dr1 == d2);
-    ///////////////////////////////
-    immutable long dy0 = 5;
-    auto fnEuclide = new EuclideDistanceFunc!(int,long);
-    long d3 = fnEuclide(data1,data2);
-    assert(d3 == dy0);
-    ///////////////////////////////////
+    for (size_t i = 0; i < nRows; ++i){
+    	string s1 = names[i];
+    	const int[] data1 = gdata[i*nCols..(i+1)*nCols];
+    	for (size_t j = 0; j < i; ++j){
+    		string s2 = names[j];
+    	    const int[] data2 = gdata[j*nCols..(j+1)*nCols];
+    	    long[] res = [];
+    	    float[] resf = []; 
+    	    foreach (f ; dists){
+				res ~= f(data1, data2, i, j);
+				}// f
+			foreach (f ; distsf){
+				resf ~= f(data1, data2, i, j);
+				}// f
+			string sout = format("%s --> %s\t%s\t%s",s1,s2, res,resf);
+			writeln(sout);	
+    	} // j
+    }// i
+    ////////////////////////////////
 }// unittest

@@ -17,10 +17,14 @@ public:
     T[] data;
     //
 public:
-    this(in U aIndex=0, in T[] aData=[], in string sId="")
+	this(){
+	}// this
+    this(in U aIndex, in T[] aData, in string sId)
     in
     {
-        assert(aIndex >= 0);
+        assert(aIndex > 0);
+        assert(!(aData is null));
+        assert(aData.length > 0);
         assert(!(sId is null));
     } body
     {
@@ -81,6 +85,11 @@ public:
         return (cast(size_t)index);
     }
 }// class Indiv!(T,U)
+//////////////////////
+interface IndivProvider(T,U){
+	void reset();
+	Indiv!(T,U) next();
+}//interface IndivProvider
 ///////////////////////
 unittest
 {
