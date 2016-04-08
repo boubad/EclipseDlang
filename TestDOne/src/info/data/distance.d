@@ -123,7 +123,7 @@ class KhiDeuxDistanceFunc(T=int,Z=double) : DistanceFunc!(T,Z){
     				assert(irow1 < _rowsum.length);
     				assert(irow2 < _rowsum.length);
         			real r = (v1/_rowsum[irow1]) - (v2/ _rowsum[irow2]);
-        			return ((r * r) / _colsum[icol]);
+        			return (r * r) * _colsum[icol];
     			}// compute_one_step
 			override real perform_compute(in T[] data1, in T[] data2, in size_t irow1, in size_t irow2) const
 				{
@@ -238,8 +238,8 @@ protected:
 ////////////////////////////////
 unittest
 {
-	import std.stdio;
-	import std.format;
+	//import std.stdio;
+	//import std.format;
 	import info.data.testdata;
 	//
 	const size_t nRows = TestData.socmortal_rows;
@@ -277,8 +277,8 @@ unittest
 			foreach (f ; distsf){
 				resf ~= f(data1, data2, i, j);
 				}// f
-			string sout = format("%s --> %s\t%s\t%s",s1,s2, res,resf);
-			writeln(sout);	
+		//	string sout = format("%s --> %s\t%s\t%s",s1,s2, res,resf);
+		//	writeln(sout);	
     	} // j
     }// i
     ////////////////////////////////
