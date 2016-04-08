@@ -15,9 +15,17 @@ public:
     U index;
     string id;
     T[] data;
+//protected:
+	bool check() const {
+		return (index > 0) &&
+		   (!(data  is null)) && (data.length > 0) &&
+		   	(!(id is null));
+	}// check
     //
-public:
+public
 	this(){
+		id = "";
+		data = [];
 	}// this
     this(in U aIndex, in T[] aData, in string sId)
     in
@@ -33,7 +41,7 @@ public:
         data = aData.dup;
     }
     @property bool is_valid() const {
-    	return (index >= 0) && (!(data is null)) && (data.length > 0);
+    	return check();
     }// is_valid
     @property size_t size() const
     in {
@@ -95,6 +103,7 @@ public:
 }// class Indiv!(T,U)
 //////////////////////
 interface IndivProvider(T,U){
+	static assert((U.stringof == "int")||(U.stringof == "short") || (U.stringof == "long") || (U.stringof == "uint")||(U.stringof == "ushort") || (U.stringof == "ulong"));
 	void reset();
 	Indiv!(T,U) next();
 }//interface IndivProvider

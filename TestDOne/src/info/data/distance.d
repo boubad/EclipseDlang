@@ -111,6 +111,7 @@ protected:
 }// class EuclideDistanceFunc
 /////////////////////////////////////////////
 class KhiDeuxDistanceFunc(T=int,Z=double) : DistanceFunc!(T,Z){
+	static assert((Z.stringof == "float")||(Z.stringof == "double")||(Z.stringof == "real"));
 	private:
 		real[] _rowsum;
 		real[] _colsum;
@@ -228,6 +229,7 @@ class VarianceDistanceFunc(T=int,Z=double) : DistanceFunc!(T,Z){
 }// VarianceDistanceFunc(T=int,Z=long)
 /////////////////////////////////////
 class DivergenceDistanceFunc(T=int,Z=double) : DistanceFunc!(T,Z){
+	static assert((Z.stringof == "float")||(Z.stringof == "double")||(Z.stringof == "real"));
 	public:
 		this()
 		{

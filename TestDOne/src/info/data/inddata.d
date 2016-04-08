@@ -7,6 +7,7 @@ import info.data.distance;
 import info.data.indiv;
 //////////////////////////
 class IndData(T=int, U = int) {
+	static assert((U.stringof == "int")||(U.stringof == "short") || (U.stringof == "long") || (U.stringof == "uint")||(U.stringof == "ushort") || (U.stringof == "ulong"));
 	private:	
 		Indiv!(T,U)[U] indivs;
 	public:
@@ -175,8 +176,47 @@ class IndData(T=int, U = int) {
 		assert(this.is_valid);
 	}
 	body{
+		static if ((Z.stringof == "float")| (Z.stringof == "double")||(Z.stringof == "real")){
+					switch(t){
+						case DistanceType.distanceKhiDeux:
+						{
+							U[] inds = this.keys;
+				assert(!(inds is null));
+				const size_t nRows = inds.length;
+				assert(nRows > 0);
+				const U index0 = inds[0];
+				Indiv!(T,U) p0 = this.get(index0);
+				assert(!(p0 is null));
+				assert(p0.is_valid);
+				const size_t nCols = p0.size;
+				assert(nCols > 0);
+				T[] gdata = [];
+				gdata.length = cast(size_t)(nRows * nCols);
+				size_t offset = 0;
+				for (size_t i = 0; i < nRows; ++i){
+					const U index = inds[i];
+					Indiv!(T,U) p = this.get(index);
+				    assert(!(p is null));
+				    assert(p.is_valid);
+				    assert(p.size >= nCols);
+				    for (size_t j = 0; j < nCols; ++j){
+				    	gdata[offset + j] = p.data[j];
+				    }// j
+				    offset += nCols;
+				}// i
+				DistanceFunc!(T,Z) f = new KhiDeuxDistanceFunc!(T,Z)(nRows,nCols,gdata);
+					return this.compute_distances(dummy,f);
+					}
+						case DistanceType.distanceDivergence:
+			{
+				auto f = new DivergenceDistanceFunc!(T,Z);
+				return this.compute_distances(dummy,f);
+			}
+						default:
+						break;
+					}// t
+				}// if
 		switch(t){
-			case DistanceType.distanceKhiDeux:
 			case DistanceType.distanceVariance:
 			{
 				U[] inds = this.keys;
@@ -203,15 +243,9 @@ class IndData(T=int, U = int) {
 				    }// j
 				    offset += nCols;
 				}// i
-				if (t == DistanceType.distanceKhiDeux){
-					DistanceFunc!(T,Z) f = new KhiDeuxDistanceFunc!(T,Z)(nRows,nCols,gdata);
-					return this.compute_distances(dummy,f);
-				} else if (t == DistanceType.distanceVariance){
 					auto f = new VarianceDistanceFunc!(T,Z)(nRows,nCols,gdata);
 					return this.compute_distances(dummy,f);
-				} 
 			}
-			break;
 			case DistanceType.distanceSquare:
 			{
 				auto f = new DistanceFunc!(T,Z);
@@ -232,11 +266,7 @@ class IndData(T=int, U = int) {
 				auto f = new MaxDistanceFunc!(T,Z);
 				return this.compute_distances(dummy,f);
 			}
-			case DistanceType.distanceDivergence:
-			{
-				auto f = new DivergenceDistanceFunc!(T,Z);
-				return this.compute_distances(dummy,f);
-			}
+			
 			default:
 			break;
 		}// t
@@ -278,7 +308,48 @@ class IndData(T=int, U = int) {
 		}// i
 		return vRes;
 	}// compute_distances
-}// class IndData(T)
+}// class IndData(T,U)
+////////////////////////////////
+class IndDataProvider(T=int,U=int) : IndivProvider!(T,U){
+	static assert((U.stringof == "int")||(U.stringof == "short") || (U.stringof == "long") || (U.stringof == "uint")||(U.stringof == "ushort") || (U.stringof == "ulong"));
+	private:
+	const IndData!(T,U) _pdata;
+	const U[] _keys;
+	size_t _currentIndex;
+	public:
+	 this(in IndData!(T,U) pdata)
+	 in{
+	 	assert(!(pdata is null));
+	 	assert(pdata.is_valid); 
+	 }
+	 body {
+	 	_pdata = pdata;
+	 	_keys = pdata.keys;
+	 	assert(!(_keys is null));
+	 	assert(_keys.length > 0);
+	 	_currentIndex = 0;
+	 	
+	 }
+	 @property bool is_valid() const {
+	 	return (!(_pdata is null)) && _pdata.is_valid &&
+	 	(!(_keys is null));
+	 }// is_vlid
+	 void reset(){
+	 	this._currentIndex = 0;
+	 }
+	Indiv!(T,U) next()
+	in {
+		assert(this.is_valid);
+	}
+	body
+	{
+		if (_currentIndex >= _keys.length){
+			return null;
+		}
+		const U index = _keys[_currentIndex++];
+		return _pdata.get(index);
+	}
+}//IndDataProvider(T,U)
 ////////////////////////////////
 unittest
 {
@@ -381,5 +452,17 @@ unittest
     		assert(xx.length == cast(size_t)(n * n));
     		//writeln(xx);
     	}// t
+    ////////////////////////////////
+    auto pProvider = new IndDataProvider!(int,int)(pData);
+    assert(!(pProvider is null));
+    pProvider.reset();
+    Indiv!(int,int) pInd = null;
+    do {
+    	pInd = pProvider.next();
+    	if (pInd is null){
+    		break;
+    	}
+    	assert(pInd.is_valid);
+    } while (!(pInd is null));	
     ////////////////////////////////
 }// unittest
