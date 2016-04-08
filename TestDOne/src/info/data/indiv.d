@@ -137,7 +137,11 @@ unittest
     immutable string sId3="testId3";
     auto ind3 = new Indiv!(int,int)(xIndex3,data3,sId3);
     assert(ind1 == ind3);
-    //assert(false);
+	//////////////////////////////
+    DistanceFunc!(int,long) func = new DistanceFunc!(int, long);
+	long ldist1 = ind1.distance(ind2,func);
+	long ldist2 = ind2.distance(ind1,func);
+	assert(ldist1 == ldist2);
 }// unittest
 //////////////////////
 //eof: indiv.d

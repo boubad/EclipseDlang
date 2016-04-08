@@ -349,9 +349,16 @@ unittest
 	dists ~= new EuclideDistanceFunc!(int,long);
 	dists ~= new MaxDistanceFunc!(int,long);
 	DistanceFunc!(int,float)[] distsf = [];
+	float[] ww = [];
+	ww.length = nCols;
+	for (size_t i = 0; i < nCols; ++i){
+		ww[i] = cast(float)(1.0/nCols);
+	}// i
 	distsf ~= new VarianceDistanceFunc!(int,float)(nRows, nCols,gdata);
 	distsf ~= new DivergenceDistanceFunc!(int,float);
 	distsf ~= new KhiDeuxDistanceFunc!(int,float)(nRows, nCols,gdata);
+	DistanceFunc!(int, float) fBase =  new DistanceFunc!(int,float);
+	distsf ~= new WeightedDistanceFunc!(int,float)(ww,fBase);
 	/////////////////////////////
 	foreach (f ; dists){
 		assert(f.is_valid);
