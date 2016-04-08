@@ -142,7 +142,7 @@ class IndData(T=int, U = int) {
 			assert(!(p2 is null));
 			return func(p1.data, p2.data,irow1,irow2);
 		} // distnce
-	Z[] compute_distances(Z)(in DistanceFunc!(T,Z) func) const 
+	Z[] compute_distances(Z)(in Z dummy,in DistanceFunc!(T,Z) func) const 
 	in {
 		assert(this.is_valid);
 		assert(!(func is null));
@@ -155,7 +155,7 @@ class IndData(T=int, U = int) {
 		Z[] vRes = [];
 		vRes.length = cast(size_t)(n * n);
 		for (size_t i = 0; i < n; ++i){
-			vRes[i * n + i] = 0;
+			vRes[i * n + i] = cast(Z)0;
 			const U index1 = kkeys[i];
 			Indiv!(T,U) p1 = this.get(index1);
 			assert(!(p1 is null));
@@ -163,13 +163,121 @@ class IndData(T=int, U = int) {
 				const U index2 = kkeys[j];
 				Indiv!(T,U) p2 = this.get(index2);
 				assert(!(p2 is null));
-				const Z r = func(p1.data,p2.data,i,j);
+				const Z r = cast(Z)func(p1.data,p2.data,i,j);
 				vRes[i*n + j] = r;
 				vRes[j*n + i] = r;
 			}// j
 		}// i
 		return vRes;
 	}//commpute_distances
+	Z[] compute_distances(Z)(Z dummy, DistanceType t = DistanceType.distanceSquare) const
+	in {
+		assert(this.is_valid);
+	}
+	body{
+		switch(t){
+			case DistanceType.distanceKhiDeux:
+			case DistanceType.distanceVariance:
+			{
+				U[] inds = this.keys;
+				assert(!(inds is null));
+				const size_t nRows = inds.length;
+				assert(nRows > 0);
+				const U index0 = inds[0];
+				Indiv!(T,U) p0 = this.get(index0);
+				assert(!(p0 is null));
+				assert(p0.is_valid);
+				const size_t nCols = p0.size;
+				assert(nCols > 0);
+				T[] gdata = [];
+				gdata.length = cast(size_t)(nRows * nCols);
+				size_t offset = 0;
+				for (size_t i = 0; i < nRows; ++i){
+					const U index = inds[i];
+					Indiv!(T,U) p = this.get(index);
+				    assert(!(p is null));
+				    assert(p.is_valid);
+				    assert(p.size >= nCols);
+				    for (size_t j = 0; j < nCols; ++j){
+				    	gdata[offset + j] = p.data[j];
+				    }// j
+				    offset += nCols;
+				}// i
+				if (t == DistanceType.distanceKhiDeux){
+					DistanceFunc!(T,Z) f = new KhiDeuxDistanceFunc!(T,Z)(nRows,nCols,gdata);
+					return this.compute_distances(dummy,f);
+				} else if (t == DistanceType.distanceVariance){
+					auto f = new VarianceDistanceFunc!(T,Z)(nRows,nCols,gdata);
+					return this.compute_distances(dummy,f);
+				} 
+			}
+			break;
+			case DistanceType.distanceSquare:
+			{
+				auto f = new DistanceFunc!(T,Z);
+				return this.compute_distances(dummy,f);
+			}
+			case DistanceType.distanceManhattan:
+			{
+				auto f = new ManhattanDistanceFunc!(T,Z);
+				return this.compute_distances(dummy,f);
+			}
+			case DistanceType.distanceEuclide:
+			{
+				auto f = new EuclideDistanceFunc!(T,Z);
+				return this.compute_distances(dummy,f);
+			}
+			case DistanceType.distanceMax:
+			{
+				auto f = new MaxDistanceFunc!(T,Z);
+				return this.compute_distances(dummy,f);
+			}
+			case DistanceType.distanceDivergence:
+			{
+				auto f = new DivergenceDistanceFunc!(T,Z);
+				return this.compute_distances(dummy,f);
+			}
+			default:
+			break;
+		}// t
+		auto ff = new DistanceFunc!(T,Z);
+		return this.compute_distances(dummy,ff);
+	}//compute_distances
+	Z[] compute_distances(Z)(Z zMax, Z zMin,
+		 DistanceType t = DistanceType.distanceSquare) const
+	in{
+		assert(zMax > zMin);
+		assert(this.is_valid);
+	}
+	body {
+		real rdummy;
+		real[] temp = this.compute_distances(rdummy, t);
+		assert(!(temp is null));
+		const size_t n = temp.length;
+		assert(n > 0);
+		real r1, r2;
+		for (size_t i = 0; i < n; ++i){
+			const real x = temp[i];
+			if (i == 0){
+				r1 = x;
+				r2 = x;
+			} else if (x < r1){
+				r1 = x;
+			} else if (x > r2){
+				r2 = x;
+			}
+		}// i
+		assert(r2 > r1);
+		const real rf = cast(real)zMin;
+		const real delta = (zMax - rf)/(r2 - r1);
+		Z[] vRes = [];
+		vRes.length = n;
+		for (size_t i = 0; i < n; ++i){
+			real x = (temp[i] - r1) * delta + rf;
+			vRes[i] = cast(Z)x;
+		}// i
+		return vRes;
+	}// compute_distances
 }// class IndData(T)
 ////////////////////////////////
 unittest
@@ -188,6 +296,7 @@ unittest
 	dists ~= new EuclideDistanceFunc!(int,long);
 	dists ~= new MaxDistanceFunc!(int,long);
 	DistanceFunc!(int,float)[] distsf = [];
+	distsf ~= new VarianceDistanceFunc!(int,float)(nRows, nCols,gdata);
 	distsf ~= new DivergenceDistanceFunc!(int,float);
 	distsf ~= new KhiDeuxDistanceFunc!(int,float)(nRows, nCols,gdata);
 	foreach (f ; dists){
@@ -235,8 +344,42 @@ unittest
     	} // j
     }// i
     ////////////////////////////////
-    long[] dd = pData.compute_distances(dists[0]);
+    long hj;
+    long[] dd = pData.compute_distances(hj,dists[0]);
     assert(!(dd is null));
     assert(dd.length == cast(size_t)(n * n));
+    ////////////////////////////////
+    DistanceType[] tt = [
+    						DistanceType.distanceSquare,
+    						DistanceType.distanceManhattan,
+    						DistanceType.distanceEuclide,
+    						DistanceType.distanceMax,
+    						DistanceType.distanceDivergence,
+    						DistanceType.distanceVariance,
+    						DistanceType.distanceKhiDeux,
+    						DistanceType.distanceWeighted];
+    	foreach (t ; tt){
+    		float dummy;
+    		float[] df = pData.compute_distances(dummy,t);
+    		assert(!(df is null));
+    		assert(df.length == cast(size_t)(n * n));
+    	}// t		
+    	long ldummy;
+    	long[] lf = pData.compute_distances(ldummy);
+    	assert(!(lf is null));
+    	assert(lf.length == cast(size_t)(n * n));
+    	//
+    	int imax = 1000;
+    	int imin = 0;
+    	int[] idist = pData.compute_distances(imax, imin);
+    	assert(!(idist is null));
+    	assert(idist.length == cast(size_t)(n * n));
+    	//
+    		foreach (t ; tt){
+    		int[] xx = pData.compute_distances(imax,imin,t);
+    		assert(!(xx is null));
+    		assert(xx.length == cast(size_t)(n * n));
+    		//writeln(xx);
+    	}// t
     ////////////////////////////////
 }// unittest

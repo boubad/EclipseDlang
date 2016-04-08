@@ -35,6 +35,14 @@ public:
     @property bool is_valid() const {
     	return (index >= 0) && (!(data is null)) && (data.length > 0);
     }// is_valid
+    @property size_t size() const
+    in {
+    	assert(this.is_valid);
+    }
+    body
+    {
+    	return this.data.length;
+    }
     //
 public:
 	Z distance(Z)(in Indiv!(T,U) aIndiv,in DistanceFunc!(T,Z) func) const
