@@ -46,6 +46,7 @@ class Cluster(T=int,U=long) : Indiv!(T,U) {
 	 {
 		return (this.members.length < 1);
 	}
+	 //TODO add size property
 	void clear_indivs(){
 		if (this.dirty){
 			this.update_center();

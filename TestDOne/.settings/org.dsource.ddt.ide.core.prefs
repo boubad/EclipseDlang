@@ -1,2 +1,4 @@
 build_targets=<?xml version\="1.0" encoding\="UTF-8" standalone\="no"?>\r\n<build_targets xmlns\="org.dsource.ddt.ide.core">\r\n<target config\="(default)" enabled\="false"/>\r\n<target config\="(default) \#unittest" enabled\="true"/>\r\n</build_targets>\r\n
 eclipse.preferences.version=1
+sdk_path=dub
+toolchain_prefs.use_project_settings=false
