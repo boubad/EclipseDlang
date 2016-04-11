@@ -3,10 +3,7 @@
 #ifndef __INFOTESTDATA_H__
 #define __INFOTESTDATA_H__
 /////////////////////////////////
-#include <cassert>
-#include <string>
-#include <valarray>
-#include <vector>
+#include <gendefs.h>
 //////////////////////////////
 namespace info {
 ///////////////////////////
@@ -17,8 +14,8 @@ public:
 public:
 	template<typename T, class ALLOCS>
 	static void get_conso(size_t &nRows, size_t &nCols, std::valarray<T> &data,
-			std::vector<std::wstring, ALLOCS> *pIndsNames = nullptr,
-			std::vector<std::wstring, ALLOCS> *pVarsNames = nullptr) {
+			std::vector<StringType, ALLOCS> *pIndsNames = nullptr,
+			std::vector<StringType, ALLOCS> *pVarsNames = nullptr) {
 		const size_t nc = InfoTestData::st_conso_cols;
 		assert(nc > 2);
 		const size_t nr = InfoTestData::st_conso_rows;
@@ -50,8 +47,8 @@ public:
 	template<typename T, class ALLOCT, class ALLOCS>
 	static void get_conso(size_t &nRows, size_t &nCols,
 			std::vector<T, ALLOCT> &data,
-			std::vector<std::wstring, ALLOCS> *pIndsNames = nullptr,
-			std::vector<std::wstring, ALLOCS> *pVarsNames = nullptr) {
+			std::vector<StringType, ALLOCS> *pIndsNames = nullptr,
+			std::vector<StringType, ALLOCS> *pVarsNames = nullptr) {
 		const size_t nc = InfoTestData::st_conso_cols;
 		assert(nc > 2);
 		const size_t nr = InfoTestData::st_conso_rows;
@@ -82,8 +79,8 @@ public:
 	} //get_conso
 	template<typename T, class ALLOCS>
 	static void get_mortal(size_t &nRows, size_t &nCols, std::valarray<T> &data,
-			std::vector<std::wstring, ALLOCS> *pIndsNames = nullptr,
-			std::vector<std::wstring, ALLOCS> *pVarsNames = nullptr) {
+			std::vector<StringType, ALLOCS> *pIndsNames = nullptr,
+			std::vector<StringType, ALLOCS> *pVarsNames = nullptr) {
 		const size_t nc = InfoTestData::st_socmortal_cols;
 		assert(nc > 2);
 		const size_t nr = InfoTestData::st_socmortal_rows;
@@ -115,8 +112,8 @@ public:
 	template<typename T, class ALLOCT, class ALLOCS>
 	static void get_mortal(size_t &nRows, size_t &nCols,
 			std::vector<T, ALLOCT> &data,
-			std::vector<std::wstring, ALLOCS> *pIndsNames = nullptr,
-			std::vector<std::wstring, ALLOCS> *pVarsNames = nullptr) {
+			std::vector<StringType, ALLOCS> *pIndsNames = nullptr,
+			std::vector<StringType, ALLOCS> *pVarsNames = nullptr) {
 		const size_t nc = InfoTestData::st_socmortal_cols;
 		assert(nc > 2);
 		const size_t nr = InfoTestData::st_socmortal_rows;
@@ -149,13 +146,21 @@ private:
 	static size_t st_socmortal_cols;
 	static size_t st_socmortal_rows;
 	static int st_socmortal_data[];
-	static const wchar_t *st_socmortal_vars[];
-	static const wchar_t *st_socmortal_inds[];
+
 	static size_t st_conso_cols;
 	static size_t st_conso_rows;
 	static int st_conso_data[];
+#if defined(INFO_STRING_TYPE)
+	static const char *st_socmortal_vars[];
+	static const char *st_socmortal_inds[];
+	static const char *st_conso_vars[];
+	static const char *st_conso_inds[];
+#else
+	static const wchar_t *st_socmortal_vars[];
+	static const wchar_t *st_socmortal_inds[];
 	static const wchar_t *st_conso_vars[];
 	static const wchar_t *st_conso_inds[];
+#endif
 };
 }// namespace info
 ///////////////////////////////

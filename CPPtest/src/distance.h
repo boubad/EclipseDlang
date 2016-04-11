@@ -205,9 +205,9 @@ protected:
 // class EuclideDistanceFunc
 ///////////////////////////////////////////
 template<typename Z = double, class ALLOCDOUBLE = std::allocator<double> > class Khi2DistanceFunc: public DistanceFunc<Z> {
-//#if defined(_MSC_VER)
+#if defined(_MSC_VER)
 	static_assert(std::is_floating_point<Z>::value, "Z must be floating point type");
-//#endif // _MSC_VER
+#endif // _MSC_VER
 public:
 	typedef std::vector<double,ALLOCDOUBLE> DoubleTypeVector;
 	//
@@ -345,9 +345,9 @@ protected:
 // class Khi2DistanceFunc<Z,ALLOCDOUBLZ>
 //////////////////////////////////////////
 template<class Z = double> class DivergenceDistanceFunc: public DistanceFunc<Z> {
-//#if defined(_MSC_VER)
+#if defined(_MSC_VER)
 	static_assert(std::is_floating_point<Z>::value, "Z must be floating point type");
-//#endif
+#endif
 public:
 	typedef DistanceFunc<Z> DistanceFuncType;
 	typedef DivergenceDistanceFunc<Z> DivergenceDistanceFuncType;

@@ -1,6 +1,32 @@
 #include "infotestdata.h"
 /////////////////////////////////
 namespace info {
+/////////////////////////////////
+#if defined(INFO_STRING_TYPE)
+const char *InfoTestData::st_conso_vars[] = { "PAIN", "LEGUMES",
+		"FRUITS","VIANDES", "VOLAILLES", "LAIT", "VIN" };
+const char *InfoTestData::st_conso_inds[] = { "MA2", "EM2", "CA2",
+		"MA3","EM3", "CA3", "MA4", "EM4", "CA4",
+		"MA5", "EM5", "CA5" };
+const char *InfoTestData::st_socmortal_vars[] = { "SUICI", "HOMIC",
+		"AROUT", "AINDU", "AAUTR", "CIRFO" };
+const char *InfoTestData::st_socmortal_inds[] = { "AUTRICHE", "FRANCE",
+		"PORTUGAL", "ALLFEDER", "BELGIQUE", "FINLANDE", "SUEDE", "SUISSE",
+		"ITALIE", "IRLNORD", "DANNEMARK", "ISLANDE", "ECOSSE", "ESPAGNE",
+		"NORVEGE", "IRLSUD", "PABAS", "ANGGALLE", "USA" };
+#else
+const wchar_t *InfoTestData::st_conso_vars[] = { L"PAIN", L"LEGUMES", L"FRUITS",
+		L"VIANDES", L"VOLAILLES", L"LAIT", L"VIN" };
+const wchar_t *InfoTestData::st_conso_inds[] = { L"MA2", L"EM2", L"CA2", L"MA3",
+		L"EM3", L"CA3", L"MA4", L"EM4", L"CA4", L"MA5", L"EM5", L"CA5" };
+const wchar_t *InfoTestData::st_socmortal_vars[] = { L"SUICI", L"HOMIC",
+		L"AROUT", L"AINDU", L"AAUTR", L"CIRFO" };
+const wchar_t *InfoTestData::st_socmortal_inds[] = { L"AUTRICHE", L"FRANCE",
+		L"PORTUGAL", L"ALLFEDER", L"BELGIQUE", L"FINLANDE", L"SUEDE", L"SUISSE",
+		L"ITALIE", L"IRLNORD", L"DANNEMARK", L"ISLANDE", L"ECOSSE", L"ESPAGNE",
+		L"NORVEGE", L"IRLSUD", L"PABAS", L"ANGGALLE", L"USA" };
+#endif
+/////////////////////////////
 size_t InfoTestData::st_conso_cols = 7;
 size_t InfoTestData::st_conso_rows = 12;
 int InfoTestData::st_conso_data[] = { 332, 428, 354, 1437, 526, 247, 437, 293,
@@ -10,10 +36,6 @@ int InfoTestData::st_conso_data[] = { 332, 428, 354, 1437, 526, 247, 437, 293,
 		699, 484, 1856, 762, 400, 416, 385, 789, 621, 2366, 1149, 304, 282, 655,
 		776, 423, 1848, 759, 495, 486, 584, 995, 548, 2056, 893, 518, 319, 515,
 		1097, 887, 2630, 1187, 561, 284 };
-const wchar_t *InfoTestData::st_conso_vars[] = { L"PAIN", L"LEGUMES", L"FRUITS",
-		L"VIANDES", L"VOLAILLES", L"LAIT", L"VIN" };
-const wchar_t *InfoTestData::st_conso_inds[] = { L"MA2", L"EM2", L"CA2", L"MA3",
-		L"EM3", L"CA3", L"MA4", L"EM4", L"CA4", L"MA5", L"EM5", L"CA5" };
 ///////////////////////////////////
 size_t InfoTestData::st_socmortal_cols = 6;
 size_t InfoTestData::st_socmortal_rows = 19;
@@ -25,12 +47,6 @@ int InfoTestData::st_socmortal_data[] = { 241, 16, 330, 43, 363, 325, 156, 9,
 		82, 15, 155, 18, 342, 59, 40, 4, 136, 17, 237, 225, 104, 6, 138, 22,
 		346, 41, 38, 7, 182, 32, 314, 37, 89, 7, 169, 10, 218, 47, 79, 10, 130,
 		14, 203, 36, 121, 102, 220, 26, 273, 158 };
-const wchar_t *InfoTestData::st_socmortal_vars[] = { L"SUICI", L"HOMIC",
-		L"AROUT", L"AINDU", L"AAUTR", L"CIRFO" };
-const wchar_t *InfoTestData::st_socmortal_inds[] = { L"AUTRICHE", L"FRANCE",
-		L"PORTUGAL", L"ALLFEDER", L"BELGIQUE", L"FINLANDE", L"SUEDE", L"SUISSE",
-		L"ITALIE", L"IRLNORD", L"DANNEMARK", L"ISLANDE", L"ECOSSE", L"ESPAGNE",
-		L"NORVEGE", L"IRLSUD", L"PABAS", L"ANGGALLE", L"USA" };
 /////////////////////////////////////
 InfoTestData::InfoTestData() {
 }
