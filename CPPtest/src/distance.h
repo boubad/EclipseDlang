@@ -209,7 +209,9 @@ namespace info {
 	///////////////////////////////////////////
 	template <typename Z = long, class ALLOCDOUBLE = std::allocator<double> > class Khi2DistanceFunc :
 		public DistanceFunc<Z> {
+#if defined(_MSC_VER)
 		static_assert(std::is_floating_point<Z>::value, "Z must be floating point type");
+#endif // _MSC_VER
 	public:
 		typedef std::vector<double, ALLOCDOUBLE> DoubleTypeVector;
 		//
@@ -220,8 +222,8 @@ namespace info {
 		DoubleTypeVector _rowsum;
 	public:
 		Khi2DistanceFunc() {
-			this._valid = false;
-			this._type = DistanceType::distanceKhiDeux;
+			this->_valid = false;
+			this->_type = DistanceType::distanceKhiDeux;
 		}
 		template <class CONTAINER>
 		Khi2DistanceFunc(const CONTAINER &srows, const CONTAINER &scols)
@@ -234,8 +236,8 @@ namespace info {
 			cols.resize(nCols);
 			DoubleTypeVector &rows = this->_rowsum;
 			rows.resize(nRows);
-			this._valid = true;
-			this._type = DistanceType::distanceKhiDeux;
+			this->_valid = true;
+			this->_type = DistanceType::distanceKhiDeux;
 			double total = 0;
 			for (size_t i = 0; i < nCols; ++i) {
 				double x = (double)scols[i];
@@ -423,13 +425,15 @@ namespace info {
 	//////////////////////////////////////////
 	template <typename Z = long> class DivergenceDistanceFunc :
 		public DistanceFunc<Z> {
+#if defined(_MSC_VER)
 		static_assert(std::is_floating_point<Z>::value, "Z must be floating point type");
+#endif // _MSC_VER
 	public:
 		typedef DistanceFunc<Z> DistanceFuncType;
 		typedef DivergenceDistanceFunc<Z> DivergenceDistanceFuncType;
 	public:
 		DivergenceDistanceFunc() {
-			this._type = DistanceType::distanceDivergence;
+			this->_type = DistanceType::distanceDivergence;
 		}
 		template <class CONTAINER>
 		DivergenceDistanceFunc(const size_t nRows, const size_t nCols, const CONTAINER &data)
@@ -489,7 +493,7 @@ namespace info {
 	private:
 		const DistanceFuncType *_pfunc;
 	public:
-		WeightedDistanceFunc() {
+		WeightedDistanceFunc():_pfunc(nullptr) {
 			this->_valid = false;
 			this->_type = DistanceType::distanceWeighted;
 		}
