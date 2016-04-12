@@ -4,6 +4,8 @@
 /////////////////////////////////////////
 #include "utils.h"
 #include "indiv.h"
+#include "indivprovider.h"
+#include "indivstore.h"
 ///////////////////////////////
 #if defined(INFO_STRING_TYPE)
 #define STRING_NORM ("norm")
@@ -417,6 +419,9 @@ namespace info {
 				}
 				dist = (Z)ss;
 			}// intra_variance
+			OStreamType & operator<<(OStreamType &os) const {
+				return (this->write_to(os));
+			}
 			virtual OStreamType & write_to(OStreamType &os) const {
 				double var = 0;
 				double tx = 0;

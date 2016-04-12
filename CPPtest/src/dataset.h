@@ -3,6 +3,7 @@
 #define __DATASET_H__
 ////////////////////////////////
 #include "indiv.h"
+#include "indivprovider.h"
 #include "matdata.h"
 ///////////////////////////////////
 namespace info {

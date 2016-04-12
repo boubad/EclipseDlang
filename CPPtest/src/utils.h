@@ -6,7 +6,48 @@
 ////////////////////////////////////////
 namespace info {
 	//////////////////////////////////////////////
-	
+	template <typename X, class ALLOCX, class ALLOCINT, class ALLOCPAIR>
+	void info_get_ranks(const std::vector<X, ALLOCX> &data,
+		std::vector<size_t, ALLOCINT> &oRanks, std::vector<std::pair<X, size_t>, ALLOCPAIR> &oPairs) {
+		const size_t n = data.size();
+		assert(n > 0);
+		oRanks.resize(n);
+		oPairs.clear();
+		for (size_t i = 0; i < n; ++i) {
+			const X v = data[i];
+			std::pair<X, size_t> o(v, i);
+			oPairs.push_back(o);
+		}// i
+		std::sort(oPairs.begin(), oPairs.end(), [](const std::pair<X, size_t> &p1, const std::pair<X, size_t> &p2)->bool {
+			return (p1.first < p2.first);
+		});
+		size_t iCurIndex = 0;
+		size_t iCurRank = 1;
+		size_t iNextRank = 1;
+		X curVal = (oPairs[0]).first;
+		while (iCurIndex < n) {
+			const std::pair<X, size_t> &p = oPairs[iCurIndex];
+			const X v = p.first;
+			const size_t ipos = p.second;
+			if (v == curVal) {
+				oRanks[ipos] = iCurRank;
+			}
+			else {
+				iCurRank = iNextRank;
+				oRanks[ipos] = iCurRank;
+				curVal = v;
+			}
+			++iCurIndex;
+			++iNextRank;
+		}// iCurIndex
+	}// info_get_ranks
+	template <typename X, class ALLOCX, class ALLOCINT>
+	void info_get_ranks(const std::vector<X, ALLOCX> &data,
+		std::vector<size_t, ALLOCINT> &oRanks) {
+		std::vector<std::pair<X, size_t> > oPairs;
+		info_get_ranks(data, oRanks, oPairs);
+	}// info_get_ranks
+	/////////////////////////////////////////////////
 	template <typename X, typename F, class ALLOCX, class ALLOCF>
 	bool info_compute_variances(const size_t nRows, const size_t nCols,
 		const std::vector<X, ALLOCX> &oData, std::vector<F, ALLOCF> &oVars) {
@@ -37,7 +78,7 @@ namespace info {
 	template <typename X, class ALLOCX, typename Z, class ALLOCZ>
 	bool info_recode_data(std::vector<X, ALLOCX> &vData,
 		std::vector<Z, ALLOCZ> &vRet,
-		const Z zMax = (Z)1000, const Z zMin = (Z)0)  {
+		const Z zMax = (Z)1000, const Z zMin = (Z)0) {
 		assert(zMin < zMax);
 		const size_t n = vData.size();
 		assert(n > 1);
@@ -71,7 +112,7 @@ namespace info {
 	template <typename X, class ALLOCX, typename Z, class ALLOCZ, class ALLOCDOUBLE>
 	bool info_normalize_data(const size_t nRows, const size_t nCols,
 		std::vector<X, ALLOCX> &vData, std::vector<Z, ALLOCZ> &vRet,
-		std::vector<double, ALLOCDOUBLE> &oVars)  {
+		std::vector<double, ALLOCDOUBLE> &oVars) {
 		static_assert(std::is_floating_point<Z>::value, "Z typename must be floating point type");
 		assert(nRows > 2);
 		assert(nCols > 0);

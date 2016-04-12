@@ -126,6 +126,7 @@ namespace info {
 		os << END_ARRAY;
 		return (os);
 	}// info_write_array
+	/////////////////////////////////////
 	template <class T, class ALLOCT>
 		OStreamType & info_write_json_value(OStreamType &os, const StringType &name, const std::vector<T, ALLOCT> &data) {
 			os << STRING_QUOTE << name << STRING_QUOTE_END;

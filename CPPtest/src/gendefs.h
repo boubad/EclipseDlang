@@ -3,6 +3,7 @@
 #define __GENDEFS_H__
 ////////////////////////////////////
 #include <cassert>
+#include <stdexcept>
 #include <type_traits>
 #include <tuple>
 #include <memory>
@@ -21,6 +22,11 @@
 #include <algorithm>
 //////////////////////////////////////////
 namespace info {
+	////////////////////////////////////////////
+	enum class DistanceMode {
+		modeInvalid,
+		modeCenter, modeUpUp, modeUpDown, modeDownUp, modeDownDown
+	}; // enum DistanceMode
 	//////////////////////////////////////////
 #if defined(INFO_STRING_TYPE)
 	typedef char CharType;

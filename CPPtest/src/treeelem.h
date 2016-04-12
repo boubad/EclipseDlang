@@ -87,6 +87,9 @@ namespace info {
 			}
 			virtual ~TreeElem() {}
 		public:
+			OStreamType & operator<<(OStreamType &os) const {
+				return (this->write_to(os));
+			}
 			OStreamType & write_to(OStreamType &os) const {
 				os << START_OBJECT << this->index() << STRING_COMMA;
 				os << this->id() << STRING_COMMA;
